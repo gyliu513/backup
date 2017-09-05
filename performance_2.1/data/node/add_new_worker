@@ -1,0 +1,23 @@
+Monday 04 September 2017  16:02:31 +0000 (0:04:11.572)       4:22:29.505 ******
+===============================================================================
+kubelet : Copying hyperkube onto operating system -------------------- 2945.09s
+python-modules : Installing Docker Python package -------------------- 1711.51s
+check : Validating ports --------------------------------------------- 1510.73s
+kubelet : Copying kubelet and kube-proxy's certs to /var/lib/kubelet directory  1499.17s
+python-modules : Copying Docker Python package ----------------------- 1164.14s
+kubelet : reload systemd ---------------------------------------------- 862.73s
+check : Calico Validation - Loading kernel modules -------------------- 551.47s
+check : Calico Validation - Making kernel modules persistent across reboot - 548.23s
+check : Copying License files ----------------------------------------- 514.26s
+kubelet : restart daemons --------------------------------------------- 333.11s
+kubelet : restart kubelet --------------------------------------------- 251.57s
+python-modules : Unarchiving Python package --------------------------- 163.41s
+kubelet : Copying CA to /var/lib/kubelet directory -------------------- 138.15s
+kubelet : Ensuring that the image registry cacert file exist ---------- 137.60s
+check : Creating the lock file ---------------------------------------- 135.76s
+kubelet : Installing kubelet service ---------------------------------- 131.40s
+kubelet : Creating kubeconfig file for kubelet ------------------------ 129.62s
+kubelet : Creating kubeconfig file for kube-proxy --------------------- 128.99s
+kubelet : Copying volume_collect.sh to /var/lib/kubelet directory ----- 128.91s
+kubelet : Ensuring that the /etc/cfc/pods directory exist ------------- 128.50s
+Playbook run took 0 days, 4 hours, 22 minutes, 14429 seconds

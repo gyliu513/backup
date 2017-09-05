@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: perfnginx
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: mynginx.com
+    http:
+      paths:
+      - path: /v1
+        backend:
+          serviceName: perf-nginx
+          servicePort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: perf-nginx
+  name: perf-nginx
+  namespace: default
+spec:
+  ports:
+  - name: nginx
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: perf-nginx
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: perf-nginx
+  name: perf-nginx
+  namespace: default
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      run: perf-nginx
+  template:
+    metadata:
+      labels:
+        run: perf-nginx
+    spec:
+      containers:
+      - image: private.reg2:5000/nginx:1.8.1
+        imagePullPolicy: IfNotPresent
+        name: perf-nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
