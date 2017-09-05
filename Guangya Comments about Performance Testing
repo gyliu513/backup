@@ -1,0 +1,28 @@
+Guangya's Requirments/Comments:
+
+1. Extend and supply the related precondtion of every cases.
+2. Append the summary for each test task to analyze 
+2. Add precondition for create pods (perf env network, image size/version )
+3. Add pod start time under set image pull policy as Never/Always, Except for docker image policy = IfNotPresent
+4. Add the kubemark usage document and result report.
+
+Added Cases:<br>
+1. Using registry api to test pull policy api response time( using pdsh 10 clients).<br>
+2. For different ingress contoller number (proxy number=1/3), same pod number to check service discovery time.
+
+
+Optimize
+
+1. Reduce the consume time for creating deployment
+
+1).  using the kubectl -f deployment.yaml
+
+	w=`date +%s.%4N` ; for a in `seq 1001 8000`; do echo $a; cp -f /root/deployment.yaml /root/deployment_tmp.yaml; sed -i "s/default-nginx-ng/default-nginx-ng"$a"/g" /root/deployment_tmp.yaml;kubectl create -f  /root/deployment_tmp.yaml; done ; while true; do b=`kubectl get pods |tail -n +2|grep Running |wc -l` ; if  [[ "$b" -eq 7000  ]] ; then x=`date +%s.%4N` ;break; fi; done; echo $w; echo $x; echo $x-$w|bc
+
+2). Using kubectl run to start deployment
+
+	 w=`date +%s.%4N` ; for a in `seq 1001 2000`; do echo $a; setsid kubectl run --name=test$a --image=private.reg2:5000/nginx:1.8.1 --replicas=1 --image-pull-policy=IfNotPresent --no-headers=true; done ; while true; do b=`kubectl get pods |tail -n +2|grep Running |wc -l` ; if  [[ "$b" -eq 1000  ]] ; then x=`date +%s.%4N` ;break; fi; done; echo $w; echo $x; echo $x-$w|bc
+ 
+ 3) Using kubectl -f path(9000 deployment directory)
+ 
+    kubectl -f path (deploy1.yaml...deploy9000.yaml)
