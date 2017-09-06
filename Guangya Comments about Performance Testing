@@ -26,3 +26,5 @@ Optimize
  3) Using kubectl -f path(9000 deployment directory)
  
     kubectl -f path (deploy1.yaml...deploy9000.yaml)
+ 
+ 4) Service discovery time and after optimize system parameter.
