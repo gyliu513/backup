@@ -1,0 +1,97 @@
+Provate Registry
+Set up private registry 要比proxy 快， 对于docker pull image
+
+
+创建cert 为docker registry sever
+
+
+Server:
+
+[root@cfc1m1p ~]#mkdir -p certs
+
+在cert 目录的外面run 下面openssl 的命令生成key 和crt 文件
+
+[root@cfc1m1p ~]# openssl req   -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt
+Generating a 4096 bit RSA private key
+....................................................................................................................................................................++
+...............................................................++
+writing new private key to 'certs/domain.key'
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [XX]:
+State or Province Name (full name) []:
+Locality Name (eg, city) [Default City]:
+Organization Name (eg, company) [Default Company Ltd]:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, your name or your server's hostname) []:private.reg
+Email Address []:
+
+Run openssl的结果就是会产生下面两个文件
+
+[root@ib17b14 ~]# ll /root/certs/
+total 8
+-rw-r--r-- 1 root root 1976 Jun 14 21:52 domain.crt
+-rw-r--r-- 1 root root 3272 Jun 14 21:52 domain.key
+
+将domain.crt 文件拷贝到client 机器的/etc/docker/certs.d/
+
+
+docker run -d -p 5000:5000 --restart=always --name registry -v /root/certs:/certs -e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/domain.crt -e REGISTRY_HTTP_TLS_KEY=/certs/domain.key ibmcom/registry-ppc64le:2
+
+https://docs.docker.com/registry/deploying/#running-a-domain-registry
+
+Client: 
+
+[root@cfc1001p ~]# cat /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+172.29.216.251  private.reg
+
+将server 上/root/certs/domain.crt 文件拷贝到client 机器的/etc/docker/certs.d/
+
+[root@cfc1001p ~]# ll /etc/docker/certs.d/private.reg:5000/
+total 4
+-rw-r--r-- 1 root root 1972 May 18 03:50 ca.crt
+
+[root@cfc1001p ~]#
+	
+
+docker tag and push
+
+[root@ib17b05 ~]# docker tag  ppc64le/tomcat:9.0 private.reg:5000/ppc64le/tomcat:9.0
+[root@ib17b05 ~]# docker push private.reg:5000/ppc64le/tomcat:9.0
+
+
+
+如果报下面错误， 用下面方式排错
+
+[root@cfc1060p private.reg2:5000]# docker pull private.reg2:5000/busybox:latest
+Error response from daemon: Get https://private.reg2:5000/v1/_ping: Forbidden
+
+1. 用telnet 尝试连接docker registry server
+
+[root@cfc1060p private.reg2:5000]# telnet private.reg 5000
+Trying 9.21.53.24...
+Connected to private.reg.
+Escape character is '^]'.
+^CConnection closed by foreign host.
+
+2. 用curl 去看是不是docker 里面有proxy server
+
+curl -k https://private.reg2:5000/v2/_catalog
+{"repositories":["busybox"]}    =====> 这个结果意味着 docker registry 没问题
+
+3. 查看是否有docker proxy， 然后将http_proxy.conf 配置如下： 
+
+[Service]
+Environment="HTTP_PROXY=http://9.21.53.14:3128"
+Environment="HTTPS_PROXY=https://9.21.53.14:3128"
+Environment="NO_PROXY=private.reg"
+
+   4.  重新reload docker service，重启docker service， 问题解决了
