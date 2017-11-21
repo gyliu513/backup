@@ -1,0 +1,29 @@
+```
+[root@cfc7 ~]# cat /etc/sysconfig/modules/ipvs.modules
+#!/bin/bash
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack_ipv4"
+for kernel_module in ${ipvs_modules}; do
+    echo $kernel_module; /sbin/modinfo -F filename ${kernel_module}
+    if [ $? -eq 0 ]; then
+        /sbin/modprobe ${kernel_module}
+    fi
+done
+chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep ip_vs
+
+[root@cfc7 ~]# lsmod |grep ip_vs
+ip_vs_ftp              13079  0
+ip_vs_sed              12519  0
+ip_vs_nq               12516  0
+ip_vs_sh               12688  0
+ip_vs_dh               12688  0
+ip_vs_lblcr            12922  0
+ip_vs_lblc             12819  0
+ip_vs_wrr              12697  0
+ip_vs_rr               12600  0
+ip_vs_wlc              12519  0
+ip_vs_lc               12516  0
+ip_vs                 141092  45 ip_vs_dh,ip_vs_lc,ip_vs_nq,ip_vs_rr,ip_vs_sh,ip_vs_ftp,ip_vs_sed,ip_vs_wlc,ip_vs_wrr,ip_vs_lblcr,ip_vs_lblc
+nf_nat                 26787  6 ip_vs_ftp,nf_nat_redirect,nf_nat_ipv4,nf_nat_ipv6,xt_nat,nf_nat_masquerade_ipv4
+nf_conntrack          133387  9 ip_vs,nf_nat,nf_nat_ipv4,nf_nat_ipv6,xt_conntrack,nf_nat_masquerade_ipv4,nf_conntrack_netlink,nf_conntrack_ipv4,nf_conntrack_ipv6
+libcrc32c              12644  5 xfs,ip_vs,dm_persistent_data,nf_nat,nf_conntrack
+```
